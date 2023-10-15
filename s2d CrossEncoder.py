@@ -9,7 +9,7 @@ import torch.cuda
 
 torch.cuda.set_device(0)
 
-# Step 1: Load and preprocess the data
+#Load and preprocess the data
 data = pd.read_csv("s2d.csv")
 
 # Tokenization and creating vocabulary
@@ -28,7 +28,7 @@ y = [disease2id[disease] for disease in diseases]
 # Split the data into train and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Step 2: Create a custom dataloader
+# Create a custom dataloader
 class CustomDataset(Dataset):
     def __init__(self, X, y, max_seq_length):
         self.X = X
@@ -48,7 +48,7 @@ class CustomDataset(Dataset):
 
         return torch.LongTensor(padded_input_seq), torch.LongTensor([label])
 
-# Step 3: Define your custom model architecture
+# Define your custom model architecture
 class CustomCrossEncoder(nn.Module):
     def __init__(self, vocab_size, embed_dim, hidden_dim, num_classes, dropout_prob=0.5):
         super(CustomCrossEncoder, self).__init__()
@@ -77,7 +77,7 @@ num_epochs = 300
 batch_size = 512
 learning_rate = 0.001
 
-# Step 4: Define loss function and optimizer
+# Define loss function and optimizer
 model = CustomCrossEncoder(vocab_size, embed_dim, hidden_dim, num_classes)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
@@ -102,7 +102,7 @@ for epoch in range(num_epochs):
         total_loss += loss.item()
     print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {total_loss / len(train_dataloader)}")
 
-# Step 6: Evaluation
+# Evaluation
 model.eval()
 test_dataset = CustomDataset(X_test, y_test,max_seq_length)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
@@ -117,3 +117,20 @@ with torch.no_grad():
         correct += (predicted == labels.squeeze()).sum().item()
 
 print(f"Test Accuracy: {100 * correct / total}%")
+
+
+# Inference function
+def predict_disease_from_input():
+    input_text = input("Enter symptoms : ")
+    input_text = input_text.split()
+    input_ids = [symptom2id[word] for word in input_text]
+    input_tensor = torch.LongTensor(input_ids).unsqueeze(0)
+    model.eval()
+    with torch.no_grad():
+        outputs = model(input_tensor)
+        _, predicted = torch.max(outputs, 1)
+        predicted_disease = id2disease[predicted.item()]
+    print(f"Predicted Disease: {predicted_disease}")
+
+# predict disease from user input
+predict_disease_from_input()
