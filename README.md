@@ -16,3 +16,7 @@ It contains two columns ```disease``` and ```symptoms```, the current dataset ha
 Install all dependencies using ```pip install -r requirements.txt```
 
 *Model trained on two GPUs*
+
+# Model
+
+The model is a custom cross encoder created by me to trainon the mentioned dataset. It has 522K parameters all of them being trainable. The model achieves an accuracy of 80.416% on training for 320 epochs on batch size of 512.
