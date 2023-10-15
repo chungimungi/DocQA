@@ -14,3 +14,5 @@ It contains two columns ```disease``` and ```symptoms```, the current dataset ha
 # Requirements
 
 Install all dependencies using ```pip install -r requirements.txt```
+
+*Model trained on two GPUs*
