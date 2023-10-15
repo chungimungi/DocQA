@@ -10,7 +10,7 @@ import torch.cuda
 torch.cuda.set_device(0)
 
 #Load and preprocess the data
-data = pd.read_csv("s2d.csv")
+data = pd.read_csv("/kaggle/input/sym2dis/s2d.csv")
 
 # Tokenization and creating vocabulary
 symptoms = data['symptoms'].tolist()
@@ -50,13 +50,14 @@ class CustomDataset(Dataset):
 
 # Define your custom model architecture
 class CustomCrossEncoder(nn.Module):
-    def __init__(self, vocab_size, embed_dim, hidden_dim, num_classes, dropout_prob=0.5):
+    def __init__(self, vocab_size, embed_dim, hidden_dim, num_classes, num_layers=2, dropout_prob=0.5):
         super(CustomCrossEncoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embed_dim)
-        self.lstm = nn.LSTM(embed_dim, hidden_dim, batch_first=True, bidirectional=True)
-        self.dropout = nn.Dropout(dropout_prob)  # Added dropout layer
-        self.fc1 = nn.Linear(2 * hidden_dim, 128)
-        self.fc2 = nn.Linear(128, num_classes)
+        self.lstm = nn.LSTM(embed_dim, hidden_dim, num_layers=num_layers, batch_first=True, bidirectional=True)
+        self.dropout = nn.Dropout(dropout_prob)
+        self.fc1 = nn.Linear(2 * hidden_dim, 256)
+        self.fc2 = nn.Linear(256, 128)
+        self.fc3 = nn.Linear(128, num_classes)
 
     def forward(self, input):
         embedded = self.embedding(input)
@@ -64,9 +65,12 @@ class CustomCrossEncoder(nn.Module):
         hidden_concat = torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1)
         x = self.fc1(hidden_concat)
         x = torch.relu(x)
-        x = self.dropout(x)  # Apply dropout after the first dense layer
-        output = self.fc2(x)
-        return output
+        x = self.dropout(x)
+        x = self.fc2(x)
+        x = torch.relu(x)
+        x = self.fc3(x)
+        return x
+
 
 # Hyperparameters
 vocab_size = len(symptom_vocab)
@@ -117,20 +121,3 @@ with torch.no_grad():
         correct += (predicted == labels.squeeze()).sum().item()
 
 print(f"Test Accuracy: {100 * correct / total}%")
-
-
-# Inference function
-def predict_disease_from_input():
-    input_text = input("Enter symptoms : ")
-    input_text = input_text.split()
-    input_ids = [symptom2id[word] for word in input_text]
-    input_tensor = torch.LongTensor(input_ids).unsqueeze(0)
-    model.eval()
-    with torch.no_grad():
-        outputs = model(input_tensor)
-        _, predicted = torch.max(outputs, 1)
-        predicted_disease = id2disease[predicted.item()]
-    print(f"Predicted Disease: {predicted_disease}")
-
-# predict disease from user input
-predict_disease_from_input()
