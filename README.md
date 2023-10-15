@@ -20,3 +20,8 @@ Install all dependencies using ```pip install -r requirements.txt```
 # Model
 
 The model is a custom cross encoder created by me to trainon the mentioned dataset. It has 522K parameters all of them being trainable. The model achieves an accuracy of 80.416% on training for 320 epochs on batch size of 512.
+
+
+## To Do
+- [ ] Increase the number of diseases in the dataset
+- [ ] Improve model performance
