@@ -5,6 +5,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 from sklearn.model_selection import train_test_split
 import numpy as np
+import torchinfo
 
 # Set the device to use two GPUs
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -137,3 +138,5 @@ def predict_disease_from_input():
 
 # Usage: predict disease from user input
 predict_disease_from_input()
+
+torchinfo.summary(model.cuda())
