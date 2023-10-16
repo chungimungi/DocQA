@@ -24,9 +24,13 @@ The model is a custom cross encoder created by me to train on the mentioned data
 
 ## To Do
 - [ ] Increase the number of diseases in the dataset
-- [ ] Improve model performance
+- [X] Improve model performance
 
 # Changes
 
 - Added multihead attention to the model improved accuracy by 7% using the same hyperparamters (80.41% to 87.01%)
     - Model now has 1.3M parameters (from 522K)
+
+- Changed ```embed_dim``` to 1024 and ```hidden_dim``` to 512, while also changing ```batch_size``` to 256.
+    - Model trained for 350 epochs this time and improved accuracy by another 7% (87.01% to 94.58%)
+    - Model now has 13.2M parameters (from 1.3M)
