@@ -10,7 +10,7 @@ import numpy as np
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Load and preprocess the data
-data = pd.read_csv("/kaggle/input/sym2dis/s2d.csv")
+data = pd.read_csv("s2d.csv")
 
 # Tokenization and creating vocabulary
 symptoms = data['symptoms'].tolist()
