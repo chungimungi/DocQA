@@ -49,7 +49,7 @@ class CustomDataset(Dataset):
 
         return torch.LongTensor(padded_input_seq), torch.LongTensor([label])
 
-# Define your custom model architecture
+# model architecture
 class CustomCrossEncoder(nn.Module):
     def __init__(self, vocab_size, embed_dim, hidden_dim, num_classes, dropout_prob=0.5):
         super(CustomCrossEncoder, self).__init__()
