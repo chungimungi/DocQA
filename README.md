@@ -1,3 +1,5 @@
+![image](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
+
 # CrossEncoder
 
 A custom cross encoder used to predict diseases based on the input of symptoms a user describes in natural language.
