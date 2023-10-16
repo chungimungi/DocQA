@@ -1,6 +1,6 @@
 # CrossEncoder
 
-A custom cross encoder used to predict diseases from a user inputted symptoms
+A custom cross encoder used to predict diseases based on the input of symptoms a user describes in natural language.
 
 # Data
 
