@@ -5,8 +5,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 from sklearn.model_selection import train_test_split
 import numpy as np
-import torch.cuda
-import torchinfo
+
+# Set the device to use two GPUs
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Load and preprocess the data
 data = pd.read_csv("s2d.csv")
@@ -47,37 +48,44 @@ class CustomDataset(Dataset):
 
         return torch.LongTensor(padded_input_seq), torch.LongTensor([label])
 
-# custom model architecture
+# model architecture
 class CustomCrossEncoder(nn.Module):
     def __init__(self, vocab_size, embed_dim, hidden_dim, num_classes, dropout_prob=0.5):
         super(CustomCrossEncoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embed_dim)
         self.lstm = nn.LSTM(embed_dim, hidden_dim, batch_first=True, bidirectional=True)
-        self.dropout = nn.Dropout(dropout_prob)  # Added dropout layer
+        self.attention = nn.MultiheadAttention(embed_dim, num_heads=8, dropout=dropout_prob)
+        self.dropout = nn.Dropout(dropout_prob)
         self.fc1 = nn.Linear(2 * hidden_dim, 128)
         self.fc2 = nn.Linear(128, num_classes)
 
     def forward(self, input):
         embedded = self.embedding(input)
         output, (hidden, _) = self.lstm(embedded)
+
+        # Apply attention
+        attended_output = self.attention(output, output, output)
+
         hidden_concat = torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1)
         x = self.fc1(hidden_concat)
         x = torch.relu(x)
-        x = self.dropout(x)  # Apply dropout after the first dense layer
+        x = self.dropout(x)
+
         output = self.fc2(x)
+
         return output
 
 # Hyperparameters
 vocab_size = len(symptom_vocab)
-embed_dim = 100
+embed_dim = 256
 hidden_dim = 128
 num_classes = len(disease_vocab)
-num_epochs = 300
+num_epochs = 320
 batch_size = 512
 learning_rate = 0.001
 
-# loss function and optimizer
-model = CustomCrossEncoder(vocab_size, embed_dim, hidden_dim, num_classes)
+# Define loss function and optimizer
+model = CustomCrossEncoder(vocab_size, embed_dim, hidden_dim, num_classes).to(device) 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -91,8 +99,8 @@ for epoch in range(num_epochs):
     total_loss = 0
     for inputs, labels in train_dataloader:
         optimizer.zero_grad()
-        inputs = torch.stack(inputs)
-        labels = torch.cat(labels)
+        inputs = torch.stack(inputs).to(device)
+        labels = torch.cat(labels).to(device)
 
         outputs = model(inputs)
         loss = criterion(outputs, labels)
@@ -103,34 +111,19 @@ for epoch in range(num_epochs):
 
 # Evaluation
 model.eval()
-test_dataset = CustomDataset(X_test, y_test,max_seq_length)
+test_dataset = CustomDataset(X_test, y_test, max_seq_length)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 correct = 0
 total = 0
 
 with torch.no_grad():
     for inputs, labels in test_dataloader:
+        inputs = inputs.to(device)  
+        labels = labels.to(device)
+
         outputs = model(inputs)
         _, predicted = torch.max(outputs, 1)
         total += labels.size(0)
         correct += (predicted == labels.squeeze()).sum().item()
 
 print(f"Test Accuracy: {100 * correct / total}%")
-
-#Inference function
-def predict_disease_from_input():
-    input_text = input("Enter symptoms : ")
-    input_text = input_text.split()
-    input_ids = [symptom2id[word] for word in input_text]
-    input_tensor = torch.LongTensor(input_ids).unsqueeze(0)
-    model.eval()
-    with torch.no_grad():
-        outputs = model(input_tensor)
-        _, predicted = torch.max(outputs, 1)
-        predicted_disease = id2disease[predicted.item()]
-    print(f"Predicted Disease: {predicted_disease}")
-
-# Usage: predict disease from user input
-predict_disease_from_input()
-
-torchinfo.summary(model.cuda())
