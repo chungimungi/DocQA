@@ -8,7 +8,7 @@ This [Data](https://github.com/chungimungi/CrossEncoder/blob/main/data/s2d.csv) 
 
 It contains two columns ```disease``` and ```symptoms```, the current dataset has 24 diseases listed with 50 symptoms for each in natural language.
 
-In [scripts/s2d CrossEncoder.py](https://github.com/chungimungi/CrossEncoder/blob/main/scripts/s2d%20CrossEncoder.py) comment the line ```model = nn.DataParallel(model)``` if multiple GPUs are unavailable for training.
+In [scripts/s2d CrossEncoder](https://github.com/chungimungi/CrossEncoder/blob/main/scripts/s2d%20CrossEncoder.py) comment the line ```model = nn.DataParallel(model)``` if multiple GPUs are unavailable for training.
 
 # Requirements
 
