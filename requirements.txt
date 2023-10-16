@@ -1,4 +1,4 @@
 pandas
 torch
-sklearn
+scikit-learn
 torchinfo
