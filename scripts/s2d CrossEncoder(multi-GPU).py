@@ -5,13 +5,12 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 from sklearn.model_selection import train_test_split
 import numpy as np
-import torchinfo
 
 # Set the device to use two GPUs
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Load and preprocess the data
-data = pd.read_csv("s2d.csv")
+data = pd.read_csv("/kaggle/input/sym2dis/s2d.csv")
 
 # Tokenization and creating vocabulary
 symptoms = data['symptoms'].tolist()
@@ -55,23 +54,30 @@ class CustomCrossEncoder(nn.Module):
         super(CustomCrossEncoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embed_dim)
         self.lstm = nn.LSTM(embed_dim, hidden_dim, batch_first=True, bidirectional=True)
-        self.dropout = nn.Dropout(dropout_prob)  # Added dropout layer
+        self.attention = nn.MultiheadAttention(embed_dim, num_heads=8, dropout=dropout_prob)
+        self.dropout = nn.Dropout(dropout_prob)
         self.fc1 = nn.Linear(2 * hidden_dim, 128)
         self.fc2 = nn.Linear(128, num_classes)
 
     def forward(self, input):
         embedded = self.embedding(input)
         output, (hidden, _) = self.lstm(embedded)
+
+        # Apply attention
+        attended_output = self.attention(output, output, output)
+
         hidden_concat = torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1)
         x = self.fc1(hidden_concat)
         x = torch.relu(x)
-        x = self.dropout(x)  # Apply dropout after the first dense layer
+        x = self.dropout(x)
+
         output = self.fc2(x)
+
         return output
 
 # Hyperparameters
 vocab_size = len(symptom_vocab)
-embed_dim = 100
+embed_dim = 256
 hidden_dim = 128
 num_classes = len(disease_vocab)
 num_epochs = 320
@@ -122,21 +128,3 @@ with torch.no_grad():
         correct += (predicted == labels.squeeze()).sum().item()
 
 print(f"Test Accuracy: {100 * correct / total}%")
-
-#Inference function
-def predict_disease_from_input():
-    input_text = input("Enter symptoms : ")
-    input_text = input_text.split()
-    input_ids = [symptom2id[word] for word in input_text]
-    input_tensor = torch.LongTensor(input_ids).unsqueeze(0)
-    model.eval()
-    with torch.no_grad():
-        outputs = model(input_tensor)
-        _, predicted = torch.max(outputs, 1)
-        predicted_disease = id2disease[predicted.item()]
-    print(f"Predicted Disease: {predicted_disease}")
-
-# Usage: predict disease from user input
-predict_disease_from_input()
-
-torchinfo.summary(model.cuda())
