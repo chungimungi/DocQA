@@ -19,9 +19,14 @@ Install all dependencies using ```pip install -r requirements.txt```
 
 # Model
 
-The model is a custom cross encoder created by me to trainon the mentioned dataset. It has 522K parameters all of them being trainable. The model achieves an accuracy of 80.416% on training for 320 epochs on batch size of 512.
+The model is a custom cross encoder created by me to train on the mentioned dataset.
 
 
 ## To Do
 - [ ] Increase the number of diseases in the dataset
 - [ ] Improve model performance
+
+# Changes
+
+- Added multihead attention to the model improved accuracy by 7% using the same hyperparamters (80.41 to 87.01)
+    - Model now has 1.3M parameters (from 522K)
