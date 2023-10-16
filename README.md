@@ -31,3 +31,8 @@ The model is a custom cross encoder created by me to train on the mentioned data
 - Changed ```embed_dim``` to 1024 and ```hidden_dim``` to 512, while also changing ```batch_size``` to 256.
     - Model trained for 350 epochs this time and improved accuracy by another 7% (87.01% to 94.58%)
     - Model now has 13.2M parameters (from 1.3M)
+ 
+
+
+
+**NOTE: This project is for demo purposes only. For any symptoms/disease, please refer to a Doctor.**
