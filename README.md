@@ -11,7 +11,7 @@ This dataset was sourced from [Kaggle](https://www.kaggle.com/datasets/niyarrbar
 
 It contains two columns ```disease``` and ```symptoms```, the current dataset has 24 diseases listed with 50 symptoms for each in natural language.
 
-In [scripts](https://github.com/chungimungi/CrossEncoder/tree/main/scripts) there are two ```.py``` files that do that same but one utilizes multiple GPUs where as the other is for single GPU or CPU training.
+In [scripts](https://github.com/chungimungi/CrossEncoder/tree/main/scripts) comment the line ```model = nn.DataParallel(model)``` if multiple GPUs are unavailable for training.
 
 # Requirements
 
