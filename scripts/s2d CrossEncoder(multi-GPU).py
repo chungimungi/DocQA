@@ -10,7 +10,7 @@ import numpy as np
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Load and preprocess the data
-data = pd.read_csv("s2d.csv")
+data = pd.read_csv("/kaggle/input/sym2dis/s2d.csv")
 
 # Tokenization and creating vocabulary
 symptoms = data['symptoms'].tolist()
@@ -77,16 +77,16 @@ class CustomCrossEncoder(nn.Module):
 
 # Hyperparameters
 vocab_size = len(symptom_vocab)
-embed_dim = 256
-hidden_dim = 128
+embed_dim = 1024
+hidden_dim = 512
 num_classes = len(disease_vocab)
-num_epochs = 320
-batch_size = 512
+num_epochs = 350
+batch_size = 256
 learning_rate = 0.001
 
 # Define loss function and optimizer
 model = CustomCrossEncoder(vocab_size, embed_dim, hidden_dim, num_classes).to(device)
-model = nn.DataParallel(model) 
+model = nn.DataParallel(model) #comment this line of code if multiple GPUs are not available
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -128,3 +128,23 @@ with torch.no_grad():
         correct += (predicted == labels.squeeze()).sum().item()
 
 print(f"Test Accuracy: {100 * correct / total}%")
+
+#Inference function
+def predict_disease_from_input():
+    input_text = input("Enter symptoms : ")
+    input_text = input_text.split()
+    input_ids = [symptom2id[word] for word in input_text]
+    input_tensor = torch.LongTensor(input_ids).unsqueeze(0)
+    model.eval()
+    with torch.no_grad():
+        outputs = model(input_tensor)
+        _, predicted = torch.max(outputs, 1)
+        predicted_disease = id2disease[predicted.item()]
+    print(f"Predicted Disease: {predicted_disease}")
+
+# Usage: predict disease from user input
+predict_disease_from_input()
+
+import torchinfo
+
+torchinfo.summary(model.cuda())
