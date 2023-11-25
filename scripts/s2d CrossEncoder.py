@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader, Dataset
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-# Set the device to use two GPUs
+# Set the device to use two GPUs if available, otherwise use CPU
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # Load and preprocess the data
@@ -30,6 +30,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Create a custom dataloader
 class CustomDataset(Dataset):
+    """Custom PyTorch dataset for handling input sequences and labels."""
     def __init__(self, X, y, max_seq_length):
         self.X = X
         self.y = y
@@ -48,8 +49,9 @@ class CustomDataset(Dataset):
 
         return torch.LongTensor(padded_input_seq), torch.LongTensor([label])
 
-# model architecture
+# Define the model architecture
 class CustomCrossEncoder(nn.Module):
+    """Custom PyTorch model for a cross-encoder with LSTM and attention."""
     def __init__(self, vocab_size, embed_dim, hidden_dim, num_classes, dropout_prob=0.5):
         super(CustomCrossEncoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embed_dim)
@@ -86,7 +88,7 @@ learning_rate = 0.001
 
 # Define loss function and optimizer
 model = CustomCrossEncoder(vocab_size, embed_dim, hidden_dim, num_classes).to(device)
-model = nn.DataParallel(model) #comment this line of code if multiple GPUs are not available
+model = nn.DataParallel(model)  # Comment this line of code if multiple GPUs are not available
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -119,7 +121,7 @@ total = 0
 
 with torch.no_grad():
     for inputs, labels in test_dataloader:
-        inputs = inputs.to(device)  
+        inputs = inputs.to(device)
         labels = labels.to(device)
 
         outputs = model(inputs)
@@ -129,8 +131,9 @@ with torch.no_grad():
 
 print(f"Test Accuracy: {100 * correct / total}%")
 
-#Inference function
+# Inference function
 def predict_disease_from_input():
+    """Predict disease from user input."""
     input_text = input("Enter symptoms : ")
     input_text = input_text.split()
     input_ids = [symptom2id[word] for word in input_text]
@@ -147,4 +150,5 @@ predict_disease_from_input()
 
 import torchinfo
 
+# Display model summary
 torchinfo.summary(model.cuda())
