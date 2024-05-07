@@ -2,7 +2,7 @@
 
 # CrossEncoder
 
-A custom cross encoder used to predict diseases based on the input of symptoms a user describes in natural language.
+A custom cross encoder QA model that gives a diagnosis based on the input of symptoms a user describes in natural language.
 
 # Data
 
@@ -18,12 +18,7 @@ Install all dependencies using ```pip install -r requirements.txt```
 
 # Model
 
-The model is a custom cross encoder created by me to train on the mentioned dataset.
 
-
-## To Do
-- [ ] Increase the number of diseases in the dataset
-- [X] Improve model performance
 
 # Changes
 
