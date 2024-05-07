@@ -18,6 +18,22 @@ Install all dependencies using ```pip install -r requirements.txt```
 
 # Model
 
+| Layer (type:depth-idx)                                   | Param #         |
+|----------------------------------------------------------|-----------------|
+| DataParallel                                            | --              |
+| └─CustomCrossEncoder: 1-1                               | --              |
+|    └─Embedding: 2-1                                     | 2,568,192       |
+|    └─LSTM: 2-2                                          | 6,299,648       |
+|    └─MultiheadAttention: 2-3                            | 3,148,800       |
+|    │    └─NonDynamicallyQuantizableLinear: 3-1          | 1,049,600       |
+|    └─Dropout: 2-4                                       | --              |
+|    └─Linear: 2-5                                        | 131,200         |
+|    └─Linear: 2-6                                        | 3,096           |
+
+Total params: 13,200,536      
+Trainable params: 13,200,536      
+Non-trainable params: 0              
+
 
 
 # Changes
